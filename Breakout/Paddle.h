@@ -7,30 +7,29 @@
 #include <SFML/OpenGL.hpp>
 #include <SFML/Main.hpp>
 
-
-class Ball
+class Paddle
 {
 public:
-	float ballSize;
+	float paddleLength;
+	float paddleWidth;
 	sf::Vector2f position;
-	sf::Vector2f velocity;
 	sf::Vector2f origin;
-	int hitCount;
-	bool isDeadBall;
-	bool isFired;
-	int collisionColorLife;
-	sf::Color wrapColor;
-	sf::Texture ballTexture;
+	float paddleSpeed;
+	int hitLife;
+	sf::Texture paddleTexture;
+	sf::Texture paddleHitTexture;
 
 public:
-	Ball(
-		float ballSize,
-		sf::Vector2f position,
-		sf::Vector2f velocity
+	Paddle(
+		float lengthIn,
+		float widthIn,
+		float speedIn,
+		sf::Vector2f positionIn
 	);
+	~Paddle();
 
-	~Ball();
 	void updateOrigin();
-	void update(float deltaTime);
+	void update(float deltaTime, int windowSizeXIn);
 	void draw(sf::RenderWindow* windowIn);
 };
+

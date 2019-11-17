@@ -23,6 +23,8 @@ Ball::Ball(
 	this->hitCount = 0;
 	this->collisionColorLife = 0;
 	this->wrapColor = sf::Color::White;
+	this->isFired = false;
+	ballTexture.loadFromFile("Resources/Textures/Ball.png");
 	updateOrigin();
 }
 Ball::~Ball() {
@@ -34,8 +36,10 @@ void Ball::updateOrigin() {
 }
 
 void Ball::update(float deltaTimeIn) {
+	if (isFired) {
 	this->position.x += this->velocity.x * deltaTimeIn;
 	this->position.y += this->velocity.y * deltaTimeIn;
+	}
 	updateOrigin();
 }
 
@@ -43,5 +47,6 @@ void Ball::draw(sf::RenderWindow* windowIn) {
 	sf::CircleShape ball(ballSize);
 	ball.setPosition(this->position.x, this->position.y);
 	ball.setFillColor(sf::Color::White);
+	//ball.setTexture(&ballTexture);
 	windowIn->draw(ball);
 }

@@ -11,19 +11,29 @@
 #include <math.h>
 #include <random>
 #include "Ball.h"
+#include "Paddle.h"
 
-//global variable stuff
-float globalBallRadius = 5.0f;
 int windowSizeX = 800;
 int windowSizeY = 800;
-float globalBallVelocityX = -0.25f;
-float globalBallVelocityY = 0.2f;
-float PI = 3.14159265f;
-float globalPaddleLength = 80.0f;
-int globalTotalHitCounter = 0;
 bool gameOver = false;
+//ball variables
+float globalBallRadius = 5.0f;
+float globalBallVelocityX = 0.00f;
+float globalBallVelocityY = -0.5f;
+
+//paddle variables
+float globalPaddleLength = 15.0f;
+float globalPaddleWidth = 80.0f;
+float globalPaddleSpeed = 0.5f;
+
+//collision variables
 int globalPaddleHitLife = 15;
 int globalBallCollisionLife = 10;
+int globalTotalHitCounter = 0;
+float perHitForce = 0.0f;
+float PI = 3.14159265f;
+
+//delta time variables
 float deltaTimePrev = 0.0f;
 float deltaTimeCurrent = 0.0f;
 float deltaTime = 1.0f;
@@ -33,6 +43,74 @@ void updateDT(sf::Clock* clockIn) {
 	deltaTimeCurrent = clockIn->getElapsedTime().asMilliseconds();
 	deltaTime = deltaTimeCurrent - deltaTimePrev;
 
+}
+
+void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
+	float safetyNet = abs(ballIn->velocity.y) * 50; //prevents ball from going through paddle when its too fast. Ball will still go through eventually.
+	bool collided = false;
+	if (ballIn->origin.x + ballIn->ballSize > paddleIn->origin.x - paddleIn->paddleWidth / 2 && ballIn->origin.x - ballIn->ballSize < paddleIn->origin.x + paddleIn->paddleWidth / 2 && ballIn->origin.y + ballIn->ballSize > paddleIn->origin.y - paddleIn->paddleLength / 2 && ballIn->origin.y - ballIn->ballSize < paddleIn->origin.y + paddleIn->paddleLength / 2 + safetyNet) {
+		collided = true;
+		paddleIn->hitLife = 15;
+		if (ballIn->velocity.y > 0) {
+			ballIn->velocity.y = abs(ballIn->velocity.y) * -1;
+		}
+	}
+
+	if (collided) {
+		float maxAngle = 200.0f;
+		float xForce = ballIn->velocity.x;
+		float yForce = ballIn->velocity.y;
+		float hitLocation = ballIn->origin.x - paddleIn->origin.x;
+		bool isLeft = true;
+		if (hitLocation > 0) {
+			isLeft = false;
+		}
+		float angleScale = abs(hitLocation) / (paddleIn->paddleWidth) / 2;
+		angleScale = angleScale * maxAngle;
+		float hypoforce = sqrt(pow(xForce, 2) + pow(yForce, 2)) + perHitForce;
+		perHitForce = 0;
+		float newVelocityX = sin(angleScale * PI / 180.0) * hypoforce;
+		float newVelocityY = cos(angleScale * PI / 180.0) * hypoforce;
+
+		if (isLeft) {
+			if (newVelocityX > 0) {
+				newVelocityX = newVelocityX * -1;
+			}
+		}
+		ballIn->velocity.x = newVelocityX;
+		ballIn->velocity.y = abs(newVelocityY) * -1;
+	}
+	else if (ballIn->origin.y > windowSizeY + safetyNet && !ballIn->isDeadBall) {
+		ballIn->isDeadBall = true;
+		ballIn->isFired = false;
+		ballIn->velocity = sf::Vector2f(globalBallVelocityX, globalBallVelocityY);
+		std::cout << "HMM??" << "\n";
+	}
+
+	if (ballIn->origin.x > windowSizeX - ballIn->ballSize) {
+		if (ballIn->velocity.x > 0) {
+			ballIn->position.x = windowSizeX - ballIn->ballSize*2;
+			ballIn->velocity.x = abs(ballIn->velocity.x) * -1;
+		}
+	}
+	else if (ballIn->origin.x < 0 + ballIn->ballSize) {
+		if (ballIn->velocity.x < 0) {
+			ballIn->position.x = 0;
+			ballIn->velocity.x = abs(ballIn->velocity.x);
+		}
+	}
+
+	if (ballIn->origin.y < 0) {
+		if (ballIn->velocity.y < 0) {
+			ballIn->position.y = 0;
+			ballIn->velocity.y = abs(ballIn->velocity.y);
+		}
+	}
+	//if (ballIn->origin.y > windowSizeY - ballIn->ballSize) {
+	//	if (ballIn->velocity.y > 0) {
+	//		ballIn->velocity.y = abs(ballIn->velocity.y) * -1;
+	//	}
+	//}
 }
 
 int main()
@@ -50,6 +128,8 @@ int main()
 	std::vector<Ball*> balls;
 	balls.push_back(&startingBall);
 
+	//Paddle stuff
+	Paddle playerPaddle(globalPaddleLength, globalPaddleWidth, globalPaddleSpeed, sf::Vector2f(windowSizeX/2 - globalPaddleWidth / 2, windowSizeY - globalPaddleLength));
 
 	while (window.isOpen())
 	{
@@ -62,10 +142,21 @@ int main()
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
-		window.clear(sf::Color::Black);
+		window.clear(sf::Color(15,15,25,255));
 
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+			balls.at(0)->isFired = true;
+			balls.at(0)->isDeadBall = false;
+		}
+		checkCollisionPaddle(balls.at(0), &playerPaddle);
+		if (!balls.at(0)->isFired) {
+			balls.at(0)->position.x = playerPaddle.origin.x - balls.at(0)->ballSize;
+			balls.at(0)->position.y = playerPaddle.origin.y - balls.at(0)->ballSize*2 - playerPaddle.paddleLength/2;
+		}
 		balls.at(0)->update(deltaTime);
 		balls.at(0)->draw(&window);
+		playerPaddle.update(deltaTime, windowSizeX);
+		playerPaddle.draw(&window);
 		window.display();
 	}
 
