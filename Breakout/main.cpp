@@ -271,6 +271,8 @@ int main()
 	sf::Text livesDisplay;
 	livesDisplay.setFont(font);
 	livesDisplay.setFillColor(sf::Color::White);
+	livesDisplay.setCharacterSize(20);
+	livesDisplay.setPosition(sf::Vector2f(windowSizeX - 90, 0));
 
 	while (window.isOpen())
 	{
@@ -329,8 +331,13 @@ int main()
 		//score text stuff
 		std::ostringstream ss;
 		ss << gameScore;
+		std::ostringstream livesSS;
+		livesSS << gameLives;
 		std::string printMe(ss.str());
+		std::string printLives(livesSS.str());
 		scoreText.setString(printMe);
+		livesDisplay.setString(printLives);
+		window.draw(livesDisplay);
 		window.draw(scoreText);
 		window.draw(scoreStringText);
 		window.draw(livesText);
