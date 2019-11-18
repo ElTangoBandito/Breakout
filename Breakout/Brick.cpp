@@ -22,9 +22,12 @@ Brick::Brick(
 	this->brickTextures = brickTexturesIn;
 	this->fadeLife = 0;
 	this->isDestroyed = false;
+	this->hitScoreAwarded = false;
+	this->isHit = false;
 	this->brickColor = sf::Color::White;
 	this->brickLife = 1;
 	this->brickTexture = this->brickTextures->at(0);
+	this->scoreMultiplier = 1;
 	updateOrigin();
 }
 
@@ -66,27 +69,35 @@ void Brick::checkCollision(Ball* ballIn) {
 
 		if (topCollision < bottomCollision && topCollision < leftCollision && topCollision < rightCollision) {
 			//collision at top
-			this->brickColor = sf::Color::Red;
+			if (ballIn->velocity.y < 0) {
+				ballIn->velocity.x = ballIn->velocity.x * -1;
+			}
 			ballIn->velocity.y = abs(ballIn->velocity.y) * -1;
 		}
 
 		if (bottomCollision < topCollision && bottomCollision < leftCollision && bottomCollision < rightCollision) {
-			this->brickColor = sf::Color::Green;
+			if (ballIn->velocity.y > 0) {
+				ballIn->velocity.x = ballIn->velocity.x * -1;
+			}
 			ballIn->velocity.y = abs(ballIn->velocity.y);
 		}
 
 		if (leftCollision < rightCollision && leftCollision < topCollision && leftCollision < bottomCollision) {
-			this->brickColor = sf::Color::Yellow;
+			if (ballIn->velocity.x < 0) {
+				ballIn->velocity.y = ballIn->velocity.y * -1;
+			}
 			ballIn->velocity.x = abs(ballIn->velocity.x) * -1;
 		}
 
 		if (rightCollision < topCollision && rightCollision < leftCollision && rightCollision < bottomCollision) {
-			this->brickColor = sf::Color::Green;
+			if (ballIn->velocity.x > 0) {
+				ballIn->velocity.y = ballIn->velocity.y * -1;
+			}
 			ballIn->velocity.x = abs(ballIn->velocity.x);
 		}
 		this->fadeLife = 10;
 		this->brickTexture = this->brickTextures->at(1);
-		//this->brickColor = sf::Color::Yellow;
+		this->isHit = true;
 	}
 }
 

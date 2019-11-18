@@ -20,7 +20,6 @@ Ball::Ball(
 	this->position = positionIn;
 	this->velocity = velocityIn;
 	this->isDeadBall = false;
-	this->hitCount = 0;
 	this->collisionColorLife = 0;
 	this->wrapColor = sf::Color::White;
 	this->isFired = false;

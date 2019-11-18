@@ -15,7 +15,6 @@ public:
 	sf::Vector2f position;
 	sf::Vector2f velocity;
 	sf::Vector2f origin;
-	int hitCount;
 	bool isDeadBall;
 	bool isFired;
 	int collisionColorLife;

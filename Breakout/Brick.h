@@ -22,7 +22,10 @@ public:
 	int brickLife;
 	int brickType;
 	int fadeLife;
+	int scoreMultiplier;
 	bool isDestroyed;
+	bool hitScoreAwarded;
+	bool isHit;
 public:
 	Brick(
 		float brickLengthIn,

@@ -16,9 +16,16 @@
 
 //wrapped bread for extra hit life
 
+
 int windowSizeX = 800;
 int windowSizeY = 800;
 bool gameOver = false;
+
+//game state varibles;
+int gameScore = 0;
+int gameLives = 3;
+int comboHit = 0;
+
 //ball variables
 float globalBallRadius = 6.0f;
 float globalBallVelocityX = 0.01f;
@@ -84,14 +91,21 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
 				newVelocityX = newVelocityX * -1;
 			}
 		}
+		comboHit = 0;
 		ballIn->velocity.x = newVelocityX;
 		ballIn->velocity.y = abs(newVelocityY) * -1;
 	}
 	else if (ballIn->origin.y > windowSizeY + safetyNet && !ballIn->isDeadBall) {
 		ballIn->isDeadBall = true;
-		ballIn->isFired = false;
-		ballIn->velocity = sf::Vector2f(globalBallVelocityX, globalBallVelocityY);
-		std::cout << "HMM??" << "\n";
+		comboHit = 0;
+		gameLives--;
+		if (gameLives < 1) {
+			gameOver = true;
+		}
+		else {
+			ballIn->isFired = false;
+			ballIn->velocity = sf::Vector2f(globalBallVelocityX, globalBallVelocityY);
+		}
 	}
 
 	if (ballIn->origin.x > windowSizeX - ballIn->ballSize) {
@@ -174,10 +188,16 @@ int main()
 
 	//Brick stuff
 	std::vector<Brick*> bricks;
-	//Brick testBrick(15, 60, sf::Vector2f(windowSizeX / 2, windowSizeY / 2), brickTextures);
-	//bricks.push_back(&testBrick);
 	setupStageOne(&bricks, &brickTextures);
-	//std::cout << bricks.at(0)->position.x << "\n";
+
+	//font stuff
+	sf::Font font;
+	if (!font.loadFromFile("Resources/Fonts/Mister Pumpkins Aged.ttf"))
+		return -1;
+	sf::Text scoreText;
+	scoreText.setFont(font);
+	scoreText.setFillColor(sf::Color::White);
+
 	while (window.isOpen())
 	{
 
@@ -207,13 +227,35 @@ int main()
 
 		for (int i = 0; i < bricks.size(); i++) {
 			bricks.at(i)->update(balls.at(0));
-			//std::cout << "Brick number " << i << " located at :" << bricks.at(i)->position.x << "\n";
 			bricks.at(i)->draw(&window);
+			if (bricks.at(i)->isHit && !bricks.at(i)->hitScoreAwarded) {
+				bricks.at(i)->hitScoreAwarded = true;
+				comboHit++;
+				int awardedScore = 0;
+				int blockScore = 100 * bricks.at(i)->scoreMultiplier;
+				int comboBonus = 0;
+				std::cout << comboHit << " \n";
+				if (comboHit > 1) {
+					comboBonus = 20 * (comboHit - 1);
+					if (comboHit > 6) {
+						comboBonus = blockScore;
+					}
+				}
+				awardedScore = blockScore + comboBonus;
+				gameScore += awardedScore;
+			}
 			if (bricks.at(i)->isDestroyed) {
 				bricks.erase(bricks.begin() + i);
 			}
 		}
 
+
+		//score text stuff
+		std::ostringstream ss;
+		ss << gameScore;
+		std::string printMe(ss.str());
+		scoreText.setString(printMe);
+		window.draw(scoreText);
 		window.display();
 	}
 
