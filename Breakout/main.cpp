@@ -191,7 +191,10 @@ void setupStageOne(std::vector<Brick*>* bricksIn, std::vector<sf::Texture*>* bri
 				break;
 			}
 			Brick* newBrick;
-			newBrick = new Brick(globalBrickLength, globalBrickWidth, sf::Vector2f(xPosition, yPosition), brickTexturesIn, brickLife);
+			srand(time(0)*i+j);
+			int randomSeed = rand() % 15 + 1;
+
+			newBrick = new Brick(globalBrickLength, globalBrickWidth, sf::Vector2f(xPosition, yPosition), brickTexturesIn, brickLife, randomSeed);
 			xPosition = xPosition + globalBrickWidth + xGapDistance;
 			bricksIn->push_back(newBrick);
 			brickLife = 1;
@@ -230,10 +233,95 @@ int main()
 	sf::Texture brick1Texture;
 	sf::Texture brick1BagTexture;
 	sf::Texture brick1HitTexture;
+	sf::Texture brick2Texture;
+	sf::Texture brick2BagTexture;
+	sf::Texture brick2HitTexture;
+	sf::Texture brick3Texture;
+	sf::Texture brick3BagTexture;
+	sf::Texture brick3HitTexture;
+	sf::Texture brick4Texture;
+	sf::Texture brick4BagTexture;
+	sf::Texture brick4HitTexture;
+	sf::Texture brick5Texture;
+	sf::Texture brick5BagTexture;
+	sf::Texture brick5HitTexture;
+	sf::Texture brick6Texture;
+	sf::Texture brick6BagTexture;
+	sf::Texture brick6HitTexture;
+	sf::Texture brick7Texture;
+	sf::Texture brick7BagTexture;
+	sf::Texture brick7HitTexture;
+	sf::Texture brick8Texture;
+	sf::Texture brick8BagTexture;
+	sf::Texture brick8HitTexture;
+	sf::Texture brick9Texture;
+	sf::Texture brick9BagTexture;
+	sf::Texture brick9HitTexture;
+	sf::Texture brick10Texture;
+	sf::Texture brick10BagTexture;
+	sf::Texture brick10HitTexture;
+	sf::Texture brick11Texture;
+	sf::Texture brick11BagTexture;
+	sf::Texture brick11HitTexture;
+	sf::Texture brick12Texture;
+	sf::Texture brick12BagTexture;
+	sf::Texture brick12HitTexture;
+	sf::Texture brick13Texture;
+	sf::Texture brick13BagTexture;
+	sf::Texture brick13HitTexture;
+	sf::Texture brick14Texture;
+	sf::Texture brick14BagTexture;
+	sf::Texture brick14HitTexture;
+	sf::Texture brick15Texture;
+	sf::Texture brick15BagTexture;
+	sf::Texture brick15HitTexture;
+
 	paperBagTexture.loadFromFile("Resources/Textures/Paperbag.png");
 	brick1Texture.loadFromFile("Resources/Textures/Brick1.jpg");
 	brick1BagTexture.loadFromFile("Resources/Textures/Brick1Bag.jpg");
 	brick1HitTexture.loadFromFile("Resources/Textures/Brick1Hit.jpg");
+	brick2Texture.loadFromFile("Resources/Textures/Brick2.jpg");
+	brick2BagTexture.loadFromFile("Resources/Textures/Brick2Bag.jpg");
+	brick2HitTexture.loadFromFile("Resources/Textures/Brick2Hit.jpg");
+	brick3Texture.loadFromFile("Resources/Textures/Brick3.jpg");
+	brick3BagTexture.loadFromFile("Resources/Textures/Brick3Bag.jpg");
+	brick3HitTexture.loadFromFile("Resources/Textures/Brick3Hit.jpg");
+	brick4Texture.loadFromFile("Resources/Textures/Brick4.jpg");
+	brick4BagTexture.loadFromFile("Resources/Textures/Brick4Bag.jpg");
+	brick4HitTexture.loadFromFile("Resources/Textures/Brick4Hit.jpg");
+	brick5Texture.loadFromFile("Resources/Textures/Brick5.jpg");
+	brick5BagTexture.loadFromFile("Resources/Textures/Brick5Bag.jpg");
+	brick5HitTexture.loadFromFile("Resources/Textures/Brick5Hit.jpg");
+	brick6Texture.loadFromFile("Resources/Textures/Brick6.jpg");
+	brick6BagTexture.loadFromFile("Resources/Textures/Brick6Bag.jpg");
+	brick6HitTexture.loadFromFile("Resources/Textures/Brick6Hit.jpg");
+	brick7Texture.loadFromFile("Resources/Textures/Brick7.jpg");
+	brick7BagTexture.loadFromFile("Resources/Textures/Brick7Bag.jpg");
+	brick7HitTexture.loadFromFile("Resources/Textures/Brick7Hit.jpg");
+	brick8Texture.loadFromFile("Resources/Textures/Brick8.jpg");
+	brick8BagTexture.loadFromFile("Resources/Textures/Brick8Bag.jpg");
+	brick8HitTexture.loadFromFile("Resources/Textures/Brick8Hit.jpg");
+	brick9Texture.loadFromFile("Resources/Textures/Brick9.jpg");
+	brick9BagTexture.loadFromFile("Resources/Textures/Brick9Bag.jpg");
+	brick9HitTexture.loadFromFile("Resources/Textures/Brick9Hit.jpg");
+	brick10Texture.loadFromFile("Resources/Textures/Brick10.jpg");
+	brick10BagTexture.loadFromFile("Resources/Textures/Brick10Bag.jpg");
+	brick10HitTexture.loadFromFile("Resources/Textures/Brick10Hit.jpg");
+	brick11Texture.loadFromFile("Resources/Textures/Brick11.jpg");
+	brick11BagTexture.loadFromFile("Resources/Textures/Brick11Bag.jpg");
+	brick11HitTexture.loadFromFile("Resources/Textures/Brick11Hit.jpg");
+	brick12Texture.loadFromFile("Resources/Textures/Brick12.jpg");
+	brick12BagTexture.loadFromFile("Resources/Textures/Brick12Bag.jpg");
+	brick12HitTexture.loadFromFile("Resources/Textures/Brick12Hit.jpg");
+	brick13Texture.loadFromFile("Resources/Textures/Brick13.jpg");
+	brick13BagTexture.loadFromFile("Resources/Textures/Brick13Bag.jpg");
+	brick13HitTexture.loadFromFile("Resources/Textures/Brick13Hit.jpg");
+	brick14Texture.loadFromFile("Resources/Textures/Brick14.jpg");
+	brick14BagTexture.loadFromFile("Resources/Textures/Brick14Bag.jpg");
+	brick14HitTexture.loadFromFile("Resources/Textures/Brick14Hit.jpg");
+	brick15Texture.loadFromFile("Resources/Textures/Brick15.jpg");
+	brick15BagTexture.loadFromFile("Resources/Textures/Brick15Bag.jpg");
+	brick15HitTexture.loadFromFile("Resources/Textures/Brick15Hit.jpg");
 	paperBagTexture.setSmooth(true);
 	brick1Texture.setSmooth(true);
 	brick1BagTexture.setSmooth(true);
@@ -242,6 +330,48 @@ int main()
 	brickTextures.push_back(&brick1BagTexture);
 	brickTextures.push_back(&brick1Texture);
 	brickTextures.push_back(&brick1HitTexture);
+	brickTextures.push_back(&brick2BagTexture);
+	brickTextures.push_back(&brick2Texture);
+	brickTextures.push_back(&brick2HitTexture);
+	brickTextures.push_back(&brick3BagTexture);
+	brickTextures.push_back(&brick3Texture);
+	brickTextures.push_back(&brick3HitTexture);
+	brickTextures.push_back(&brick4BagTexture);
+	brickTextures.push_back(&brick4Texture);
+	brickTextures.push_back(&brick4HitTexture);
+	brickTextures.push_back(&brick5BagTexture);
+	brickTextures.push_back(&brick5Texture);
+	brickTextures.push_back(&brick5HitTexture);
+	brickTextures.push_back(&brick6BagTexture);
+	brickTextures.push_back(&brick6Texture);
+	brickTextures.push_back(&brick6HitTexture);
+	brickTextures.push_back(&brick7BagTexture);
+	brickTextures.push_back(&brick7Texture);
+	brickTextures.push_back(&brick7HitTexture);
+	brickTextures.push_back(&brick8BagTexture);
+	brickTextures.push_back(&brick8Texture);
+	brickTextures.push_back(&brick8HitTexture);
+	brickTextures.push_back(&brick9BagTexture);
+	brickTextures.push_back(&brick9Texture);
+	brickTextures.push_back(&brick9HitTexture);
+	brickTextures.push_back(&brick10BagTexture);
+	brickTextures.push_back(&brick10Texture);
+	brickTextures.push_back(&brick10HitTexture);
+	brickTextures.push_back(&brick11BagTexture);
+	brickTextures.push_back(&brick11Texture);
+	brickTextures.push_back(&brick11HitTexture);
+	brickTextures.push_back(&brick12BagTexture);
+	brickTextures.push_back(&brick12Texture);
+	brickTextures.push_back(&brick12HitTexture);
+	brickTextures.push_back(&brick13BagTexture);
+	brickTextures.push_back(&brick13Texture);
+	brickTextures.push_back(&brick13HitTexture);
+	brickTextures.push_back(&brick14BagTexture);
+	brickTextures.push_back(&brick14Texture);
+	brickTextures.push_back(&brick14HitTexture);
+	brickTextures.push_back(&brick15BagTexture);
+	brickTextures.push_back(&brick15Texture);
+	brickTextures.push_back(&brick15HitTexture);
 
 	//Brick stuff
 	std::vector<Brick*> bricks;
@@ -301,6 +431,7 @@ int main()
 		playerPaddle.update(deltaTime, windowSizeX);
 		playerPaddle.draw(&window);
 
+		std::vector<int> indexToDelete;
 		for (int i = 0; i < bricks.size(); i++) {
 			bricks.at(i)->update(balls.at(0));
 			bricks.at(i)->draw(&window);
@@ -323,9 +454,15 @@ int main()
 				}
 			}
 			if (bricks.at(i)->isDestroyed) {
-				bricks.erase(bricks.begin() + i);
+				indexToDelete.push_back(i);
+				//bricks.erase(bricks.begin() + i); This causes all bricks to flicker. Maybe because vector.erase forces the loop to restart?
 			}
 		}
+
+		for (int i = indexToDelete.size() - 1; i > -1; i--) {
+			bricks.erase(bricks.begin() + indexToDelete.at(i));
+		}
+
 
 
 		//score text stuff
@@ -342,6 +479,7 @@ int main()
 		window.draw(scoreStringText);
 		window.draw(livesText);
 		window.display();
+		//clock.restart();
 	}
 
 	return 0;

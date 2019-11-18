@@ -38,12 +38,12 @@ void Paddle::updateOrigin() {
 
 void Paddle::update(float deltaTimeIn, int windowSizeXIn) {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
-		if (this->origin.x > this->paddleWidth / 2) {
+		if (this->origin.x > 15){// this->paddleWidth / 2) {
 			this->position.x -= paddleSpeed * deltaTimeIn;
 		}
 	}
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
-		if (this->origin.x < windowSizeXIn - this->paddleWidth / 2) {
+		if (this->origin.x < windowSizeXIn - 15){// - this->paddleWidth / 2) {
 			this->position.x += paddleSpeed * deltaTimeIn;
 		}
 	}

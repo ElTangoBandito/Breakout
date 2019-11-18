@@ -23,6 +23,7 @@ public:
 	int brickType;
 	int fadeLife;
 	int scoreMultiplier;
+	float clockTime;
 	bool isDestroyed;
 	bool hitScoreAwarded;
 	bool isHit;
@@ -32,7 +33,8 @@ public:
 		float brickWidthIn,
 		sf::Vector2f positionIn,
 		std::vector<sf::Texture*>* brickTexturesIn,
-		int lifeIn
+		int lifeIn,
+		int randomIn
 	);
 	~Brick();
 

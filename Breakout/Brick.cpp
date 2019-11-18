@@ -15,7 +15,8 @@ Brick::Brick(
 	float brickWidthIn,
 	sf::Vector2f positionIn,
 	std::vector<sf::Texture*>* brickTexturesIn,
-	int lifeIn
+	int lifeIn,
+	int randomIn
 ) {
 	this->brickLength = brickLengthIn;
 	this->brickWidth = brickWidthIn;
@@ -28,6 +29,7 @@ Brick::Brick(
 	this->brickColor = sf::Color::White;
 	this->brickLife = lifeIn;
 	this->scoreMultiplier = this->brickLife;
+	this->brickType = randomIn;
 	generateBreadTexture();
 	updateOrigin();
 }
@@ -40,18 +42,19 @@ void Brick::updateOrigin() {
 }
 
 void Brick::generateBreadTexture() {
+	int textureIndex = 3 * this->brickType;
 	switch (this->brickLife) {
 		case 3:
 			this->brickTexture = this->brickTextures->at(0);
 			break;
 		case 2:
-			this->brickTexture = this->brickTextures->at(1);
+			this->brickTexture = this->brickTextures->at(textureIndex - 2);
 			break;
 		case 1:
-			this->brickTexture = this->brickTextures->at(2);
+			this->brickTexture = this->brickTextures->at(textureIndex - 1);
 			break;
 		case 0:
-			this->brickTexture = this->brickTextures->at(3);
+			this->brickTexture = this->brickTextures->at(textureIndex);
 			break;
 	}
 }
@@ -90,6 +93,7 @@ void Brick::checkCollision(Ball* ballIn) {
 			if (ballIn->velocity.y < 0) {
 				ballIn->velocity.x = ballIn->velocity.x * -1;
 			}
+			ballIn->position.y -= 1;
 			ballIn->velocity.y = abs(ballIn->velocity.y) * -1;
 		}
 
@@ -97,13 +101,16 @@ void Brick::checkCollision(Ball* ballIn) {
 			if (ballIn->velocity.y > 0) {
 				ballIn->velocity.x = ballIn->velocity.x * -1;
 			}
+			ballIn->position.y += 1;
 			ballIn->velocity.y = abs(ballIn->velocity.y);
+
 		}
 
 		if (leftCollision < rightCollision && leftCollision < topCollision && leftCollision < bottomCollision) {
 			if (ballIn->velocity.x < 0) {
 				ballIn->velocity.y = ballIn->velocity.y * -1;
 			}
+			ballIn->position.x -= 1;
 			ballIn->velocity.x = abs(ballIn->velocity.x) * -1;
 		}
 
@@ -111,6 +118,7 @@ void Brick::checkCollision(Ball* ballIn) {
 			if (ballIn->velocity.x > 0) {
 				ballIn->velocity.y = ballIn->velocity.y * -1;
 			}
+			ballIn->position.x += 1;
 			ballIn->velocity.x = abs(ballIn->velocity.x);
 		}
 		this->brickLife--;
