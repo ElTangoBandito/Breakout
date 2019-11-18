@@ -14,7 +14,8 @@ Brick::Brick(
 	float brickLengthIn,
 	float brickWidthIn,
 	sf::Vector2f positionIn,
-	std::vector<sf::Texture*>* brickTexturesIn
+	std::vector<sf::Texture*>* brickTexturesIn,
+	int lifeIn
 ) {
 	this->brickLength = brickLengthIn;
 	this->brickWidth = brickWidthIn;
@@ -25,9 +26,9 @@ Brick::Brick(
 	this->hitScoreAwarded = false;
 	this->isHit = false;
 	this->brickColor = sf::Color::White;
-	this->brickLife = 1;
-	this->brickTexture = this->brickTextures->at(0);
-	this->scoreMultiplier = 1;
+	this->brickLife = lifeIn;
+	this->scoreMultiplier = this->brickLife;
+	generateBreadTexture();
 	updateOrigin();
 }
 
@@ -36,6 +37,23 @@ Brick::~Brick(){}
 void Brick::updateOrigin() {
 	this->origin.x = this->position.x + this->brickWidth / 2;
 	this->origin.y = this->position.y + this->brickLength / 2;
+}
+
+void Brick::generateBreadTexture() {
+	switch (this->brickLife) {
+		case 3:
+			this->brickTexture = this->brickTextures->at(0);
+			break;
+		case 2:
+			this->brickTexture = this->brickTextures->at(1);
+			break;
+		case 1:
+			this->brickTexture = this->brickTextures->at(2);
+			break;
+		case 0:
+			this->brickTexture = this->brickTextures->at(3);
+			break;
+	}
 }
 
 void Brick::update(Ball* ballIn) {
@@ -95,9 +113,13 @@ void Brick::checkCollision(Ball* ballIn) {
 			}
 			ballIn->velocity.x = abs(ballIn->velocity.x);
 		}
-		this->fadeLife = 10;
-		this->brickTexture = this->brickTextures->at(1);
+		this->brickLife--;
 		this->isHit = true;
+		if (brickLife == 0) {
+			this->fadeLife = 10;
+		}
+		generateBreadTexture();
+		
 	}
 }
 

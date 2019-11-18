@@ -31,11 +31,13 @@ public:
 		float brickLengthIn,
 		float brickWidthIn,
 		sf::Vector2f positionIn,
-		std::vector<sf::Texture*>* brickTexturesIn
+		std::vector<sf::Texture*>* brickTexturesIn,
+		int lifeIn
 	);
 	~Brick();
 
 	void updateOrigin();
+	void generateBreadTexture();
 	void update(Ball* ballIn);
 	void checkCollision(Ball* ballIn);
 	void draw(sf::RenderWindow* windowIn);

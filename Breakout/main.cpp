@@ -28,7 +28,7 @@ int comboHit = 0;
 
 //ball variables
 float globalBallRadius = 6.0f;
-float globalBallVelocityX = 0.01f;
+float globalBallVelocityX = 0.04f;
 float globalBallVelocityY = -0.5f;
 
 //paddle variables
@@ -127,11 +127,6 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
 			ballIn->velocity.y = abs(ballIn->velocity.y);
 		}
 	}
-	//if (ballIn->origin.y > windowSizeY - ballIn->ballSize) {
-	//	if (ballIn->velocity.y > 0) {
-	//		ballIn->velocity.y = abs(ballIn->velocity.y) * -1;
-	//	}
-	//}
 }
 
 void setupStageOne(std::vector<Brick*>* bricksIn, std::vector<sf::Texture*>* brickTexturesIn) {
@@ -142,12 +137,64 @@ void setupStageOne(std::vector<Brick*>* bricksIn, std::vector<sf::Texture*>* bri
 	float edgeDistance = (windowSizeX - (colBlocksNeeded * (globalBrickWidth + xGapDistance)))/2;
 	float xPosition = edgeDistance;
 	float yPosition = 35.0f;
+	int brickLife = 1;
 	for (int i = 0; i < rowsNeeded; i++) {
 		for (int j = 0; j < colBlocksNeeded; j++) {
+			switch (i) {
+			case 0:
+				if (j % 2 == 0) {
+					brickLife = 3;
+				}
+				else if (i == 0 && j % 2 == 1) {
+					brickLife = 2;
+				}
+				break;
+			case 1:
+				break;
+			case 2:
+				if (j == 1 || j == 4 || j == 7) {
+					brickLife = 2;
+				}
+				break;
+			case 3:
+				if (j == 0 || j == 1 || j == 3 || j == 4 || j == 6 || j == 7) {
+					brickLife = 2;
+				}
+				break;
+			case 4: 
+				if (j == 0 || j == 2 || j == 3 || j == 5 || j == 6 || j == 8) {
+					brickLife = 2;
+				}
+				if (j == 1 || j == 4||j == 7) {
+					brickLife = 3;
+				}
+				break;
+			case 5:
+				if (j == 0 || j == 1 || j == 3 || j == 4 || j == 6 || j == 7) {
+					brickLife = 2;
+				}
+				break;
+			case 6:
+				if (j == 1 || j == 4 || j == 7) {
+					brickLife = 2;
+				}
+				break;
+			case 7:
+				break;
+			case 8:
+				if (j % 2 == 0) {
+					brickLife = 2;
+				}
+				else if (j % 2 == 1) {
+					brickLife = 3;
+				}
+				break;
+			}
 			Brick* newBrick;
-			newBrick = new Brick(globalBrickLength, globalBrickWidth, sf::Vector2f(xPosition, yPosition), brickTexturesIn);
+			newBrick = new Brick(globalBrickLength, globalBrickWidth, sf::Vector2f(xPosition, yPosition), brickTexturesIn, brickLife);
 			xPosition = xPosition + globalBrickWidth + xGapDistance;
 			bricksIn->push_back(newBrick);
+			brickLife = 1;
 		}
 		xPosition = edgeDistance;
 		colBlocksNeeded = floor(windowSizeX / (globalBrickWidth + xGapDistance));
@@ -179,10 +226,20 @@ int main()
 
 	//Brick Textures
 	std::vector<sf::Texture*> brickTextures;
+	sf::Texture paperBagTexture;
 	sf::Texture brick1Texture;
+	sf::Texture brick1BagTexture;
 	sf::Texture brick1HitTexture;
+	paperBagTexture.loadFromFile("Resources/Textures/Paperbag.png");
 	brick1Texture.loadFromFile("Resources/Textures/Brick1.jpg");
+	brick1BagTexture.loadFromFile("Resources/Textures/Brick1Bag.jpg");
 	brick1HitTexture.loadFromFile("Resources/Textures/Brick1Hit.jpg");
+	paperBagTexture.setSmooth(true);
+	brick1Texture.setSmooth(true);
+	brick1BagTexture.setSmooth(true);
+	brick1HitTexture.setSmooth(true);
+	brickTextures.push_back(&paperBagTexture);
+	brickTextures.push_back(&brick1BagTexture);
 	brickTextures.push_back(&brick1Texture);
 	brickTextures.push_back(&brick1HitTexture);
 
@@ -197,6 +254,23 @@ int main()
 	sf::Text scoreText;
 	scoreText.setFont(font);
 	scoreText.setFillColor(sf::Color::White);
+	scoreText.setCharacterSize(20);
+	scoreText.setPosition(sf::Vector2f(62, 0));
+	sf::Text scoreStringText;
+	scoreStringText.setFont(font);
+	scoreStringText.setFillColor(sf::Color::White);
+	scoreStringText.setCharacterSize(20);
+	scoreStringText.setString("Score :");
+
+	sf::Text livesText;
+	livesText.setFont(font);
+	livesText.setFillColor(sf::Color::White);
+	livesText.setString("Lives :");
+	livesText.setPosition(sf::Vector2f(windowSizeX - 150, 0));
+	livesText.setCharacterSize(20);
+	sf::Text livesDisplay;
+	livesDisplay.setFont(font);
+	livesDisplay.setFillColor(sf::Color::White);
 
 	while (window.isOpen())
 	{
@@ -228,21 +302,23 @@ int main()
 		for (int i = 0; i < bricks.size(); i++) {
 			bricks.at(i)->update(balls.at(0));
 			bricks.at(i)->draw(&window);
-			if (bricks.at(i)->isHit && !bricks.at(i)->hitScoreAwarded) {
-				bricks.at(i)->hitScoreAwarded = true;
+			if (bricks.at(i)->isHit) {
 				comboHit++;
-				int awardedScore = 0;
-				int blockScore = 100 * bricks.at(i)->scoreMultiplier;
-				int comboBonus = 0;
-				std::cout << comboHit << " \n";
-				if (comboHit > 1) {
-					comboBonus = 20 * (comboHit - 1);
-					if (comboHit > 6) {
-						comboBonus = blockScore;
+				bricks.at(i)->isHit = false;
+				if (!bricks.at(i)->hitScoreAwarded && bricks.at(i)->brickLife == 0) {
+					bricks.at(i)->hitScoreAwarded = true;
+					int awardedScore = 0;
+					int blockScore = 10 * bricks.at(i)->scoreMultiplier;
+					int comboBonus = 0;
+					if (comboHit > 1) {
+						comboBonus = 2 * (comboHit - 1);
+						if (comboHit > 6) {
+							comboBonus = blockScore;
+						}
 					}
+					awardedScore = blockScore + comboBonus;
+					gameScore += awardedScore;
 				}
-				awardedScore = blockScore + comboBonus;
-				gameScore += awardedScore;
 			}
 			if (bricks.at(i)->isDestroyed) {
 				bricks.erase(bricks.begin() + i);
@@ -256,6 +332,8 @@ int main()
 		std::string printMe(ss.str());
 		scoreText.setString(printMe);
 		window.draw(scoreText);
+		window.draw(scoreStringText);
+		window.draw(livesText);
 		window.display();
 	}
 
