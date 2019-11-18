@@ -12,19 +12,26 @@
 #include <random>
 #include "Ball.h"
 #include "Paddle.h"
+#include "Brick.h"
+
+//wrapped bread for extra hit life
 
 int windowSizeX = 800;
 int windowSizeY = 800;
 bool gameOver = false;
 //ball variables
-float globalBallRadius = 5.0f;
-float globalBallVelocityX = 0.00f;
+float globalBallRadius = 6.0f;
+float globalBallVelocityX = 0.01f;
 float globalBallVelocityY = -0.5f;
 
 //paddle variables
-float globalPaddleLength = 15.0f;
-float globalPaddleWidth = 80.0f;
+float globalPaddleLength = 20.0f;
+float globalPaddleWidth = 81.3f;
 float globalPaddleSpeed = 0.5f;
+
+//brick variables
+float globalBrickWidth = 80.0f;
+float globalBrickLength = 20.0f;
 
 //collision variables
 int globalPaddleHitLife = 15;
@@ -57,7 +64,7 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
 	}
 
 	if (collided) {
-		float maxAngle = 200.0f;
+		float maxAngle = 260.0f;
 		float xForce = ballIn->velocity.x;
 		float yForce = ballIn->velocity.y;
 		float hitLocation = ballIn->origin.x - paddleIn->origin.x;
@@ -113,6 +120,31 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
 	//}
 }
 
+void setupStageOne(std::vector<Brick*>* bricksIn, std::vector<sf::Texture*>* brickTexturesIn) {
+	float xGapDistance = 7.0f;
+	float yGapDistance = 20.0f;
+	int colBlocksNeeded = floor(windowSizeX / (globalBrickWidth + xGapDistance));
+	int rowsNeeded = 9;
+	float edgeDistance = (windowSizeX - (colBlocksNeeded * (globalBrickWidth + xGapDistance)))/2;
+	float xPosition = edgeDistance;
+	float yPosition = 35.0f;
+	for (int i = 0; i < rowsNeeded; i++) {
+		for (int j = 0; j < colBlocksNeeded; j++) {
+			Brick* newBrick;
+			newBrick = new Brick(globalBrickLength, globalBrickWidth, sf::Vector2f(xPosition, yPosition), brickTexturesIn);
+			xPosition = xPosition + globalBrickWidth + xGapDistance;
+			bricksIn->push_back(newBrick);
+		}
+		xPosition = edgeDistance;
+		colBlocksNeeded = floor(windowSizeX / (globalBrickWidth + xGapDistance));
+		if (i % 2 == 0) {
+			xPosition = globalBrickWidth/2;
+			colBlocksNeeded -= 1;
+		}
+		yPosition = yPosition + globalBrickLength + yGapDistance;
+	}
+}
+
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(windowSizeX, windowSizeY), "My Window!");
@@ -131,6 +163,21 @@ int main()
 	//Paddle stuff
 	Paddle playerPaddle(globalPaddleLength, globalPaddleWidth, globalPaddleSpeed, sf::Vector2f(windowSizeX/2 - globalPaddleWidth / 2, windowSizeY - globalPaddleLength));
 
+	//Brick Textures
+	std::vector<sf::Texture*> brickTextures;
+	sf::Texture brick1Texture;
+	sf::Texture brick1HitTexture;
+	brick1Texture.loadFromFile("Resources/Textures/Brick1.jpg");
+	brick1HitTexture.loadFromFile("Resources/Textures/Brick1Hit.jpg");
+	brickTextures.push_back(&brick1Texture);
+	brickTextures.push_back(&brick1HitTexture);
+
+	//Brick stuff
+	std::vector<Brick*> bricks;
+	//Brick testBrick(15, 60, sf::Vector2f(windowSizeX / 2, windowSizeY / 2), brickTextures);
+	//bricks.push_back(&testBrick);
+	setupStageOne(&bricks, &brickTextures);
+	//std::cout << bricks.at(0)->position.x << "\n";
 	while (window.isOpen())
 	{
 
@@ -157,6 +204,16 @@ int main()
 		balls.at(0)->draw(&window);
 		playerPaddle.update(deltaTime, windowSizeX);
 		playerPaddle.draw(&window);
+
+		for (int i = 0; i < bricks.size(); i++) {
+			bricks.at(i)->update(balls.at(0));
+			//std::cout << "Brick number " << i << " located at :" << bricks.at(i)->position.x << "\n";
+			bricks.at(i)->draw(&window);
+			if (bricks.at(i)->isDestroyed) {
+				bricks.erase(bricks.begin() + i);
+			}
+		}
+
 		window.display();
 	}
 

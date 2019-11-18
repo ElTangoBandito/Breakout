@@ -22,6 +22,8 @@ Paddle::Paddle(
 	this->hitLife = 0;
 	paddleTexture.loadFromFile("Resources/Textures/Paddle.jpg");
 	paddleHitTexture.loadFromFile("Resources/Textures/PaddleHit.jpg");
+	paddleTexture.setSmooth(true);
+	paddleHitTexture.setSmooth(true);
 	updateOrigin();
 }
 
