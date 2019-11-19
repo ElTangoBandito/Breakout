@@ -77,6 +77,7 @@ void Brick::checkCollision(Ball* ballIn) {
 		collided = true;
 	}
 	if (collided) {
+		ballIn->collisionColorLife = 10;
 		//code concept sourc https://stackoverflow.com/questions/5062833/detecting-the-direction-of-a-collision
 		float ballBottom = ballIn->origin.y + ballIn->ballSize;
 		float ballRight = ballIn->origin.x + ballIn->ballSize;

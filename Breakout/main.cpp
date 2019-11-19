@@ -94,6 +94,8 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
 		comboHit = 0;
 		ballIn->velocity.x = newVelocityX;
 		ballIn->velocity.y = abs(newVelocityY) * -1;
+
+		ballIn->collisionColorLife = 10;
 	}
 	else if (ballIn->origin.y > windowSizeY + safetyNet && !ballIn->isDeadBall) {
 		ballIn->isDeadBall = true;
@@ -112,12 +114,14 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
 		if (ballIn->velocity.x > 0) {
 			ballIn->position.x = windowSizeX - ballIn->ballSize*2;
 			ballIn->velocity.x = abs(ballIn->velocity.x) * -1;
+			ballIn->collisionColorLife = 10;
 		}
 	}
 	else if (ballIn->origin.x < 0 + ballIn->ballSize) {
 		if (ballIn->velocity.x < 0) {
 			ballIn->position.x = 0;
 			ballIn->velocity.x = abs(ballIn->velocity.x);
+			ballIn->collisionColorLife = 10;
 		}
 	}
 
@@ -125,6 +129,7 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
 		if (ballIn->velocity.y < 0) {
 			ballIn->position.y = 0;
 			ballIn->velocity.y = abs(ballIn->velocity.y);
+			ballIn->collisionColorLife = 10;
 		}
 	}
 }

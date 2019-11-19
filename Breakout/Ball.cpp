@@ -23,6 +23,7 @@ Ball::Ball(
 	this->collisionColorLife = 0;
 	this->wrapColor = sf::Color::White;
 	this->isFired = false;
+	this->collisionColorLife = 0;
 	ballTexture.loadFromFile("Resources/Textures/Ball.png");
 	updateOrigin();
 }
@@ -47,5 +48,9 @@ void Ball::draw(sf::RenderWindow* windowIn) {
 	ball.setPosition(this->position.x, this->position.y);
 	ball.setFillColor(sf::Color::White);
 	//ball.setTexture(&ballTexture);
+	if (collisionColorLife > 0) {
+		ball.setFillColor(sf::Color(255, 255, 10, 255));
+		collisionColorLife--;
+	}
 	windowIn->draw(ball);
 }
