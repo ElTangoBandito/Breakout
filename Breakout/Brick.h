@@ -17,6 +17,7 @@ public:
 	sf::Vector2f position;
 	sf::Vector2f origin;
 	std::vector<sf::Texture*>* brickTextures;
+	std::vector<sf::Sound*>* breadSounds;
 	sf::Texture* brickTexture;
 	sf::Color brickColor;
 	int brickLife;
@@ -33,6 +34,7 @@ public:
 		float brickWidthIn,
 		sf::Vector2f positionIn,
 		std::vector<sf::Texture*>* brickTexturesIn,
+		std::vector<sf::Sound*>* breadSoundsIn,
 		int lifeIn,
 		int randomIn
 	);

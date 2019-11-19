@@ -15,6 +15,7 @@ Brick::Brick(
 	float brickWidthIn,
 	sf::Vector2f positionIn,
 	std::vector<sf::Texture*>* brickTexturesIn,
+	std::vector<sf::Sound*>* breadSoundsIn,
 	int lifeIn,
 	int randomIn
 ) {
@@ -30,6 +31,7 @@ Brick::Brick(
 	this->brickLife = lifeIn;
 	this->scoreMultiplier = this->brickLife;
 	this->brickType = randomIn;
+	this->breadSounds = breadSoundsIn;
 	generateBreadTexture();
 	updateOrigin();
 }
@@ -75,6 +77,12 @@ void Brick::checkCollision(Ball* ballIn) {
 	bool collided = false;
 	if (ballIn->origin.x + ballIn->ballSize > this->origin.x - this->brickWidth / 2 && ballIn->origin.x - ballIn->ballSize < this->origin.x + this->brickWidth / 2 && ballIn->origin.y + ballIn->ballSize > this->origin.y - this->brickLength / 2 && ballIn->origin.y - ballIn->ballSize < this->origin.y + this->brickLength / 2) {
 		collided = true;
+		if (this->brickLife > 1) {
+			this->breadSounds->at(0)->play();
+		}
+		else {
+			this->breadSounds->at(this->brickType)->play();
+		}
 	}
 	if (collided) {
 		ballIn->collisionColorLife = 10;

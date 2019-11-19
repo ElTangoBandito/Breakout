@@ -36,7 +36,7 @@ void Ball::updateOrigin() {
 }
 
 void Ball::update(float deltaTimeIn) {
-	if (isFired) {
+	if (isFired && !isDeadBall) {
 	this->position.x += this->velocity.x * deltaTimeIn;
 	this->position.y += this->velocity.y * deltaTimeIn;
 	}

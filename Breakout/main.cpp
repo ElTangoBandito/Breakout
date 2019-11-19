@@ -59,7 +59,7 @@ void updateDT(sf::Clock* clockIn) {
 
 }
 
-void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
+void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn, sf::Sound* ballEdgeSoundIn, sf::Sound* deadBallSoundIn, sf::Sound* paddleHitIn, sf::Sound* gameOverSoundIn) {
 	float safetyNet = abs(ballIn->velocity.y) * 50; //prevents ball from going through paddle when its too fast. Ball will still go through eventually.
 	bool collided = false;
 	if (ballIn->origin.x + ballIn->ballSize > paddleIn->origin.x - paddleIn->paddleWidth / 2 && ballIn->origin.x - ballIn->ballSize < paddleIn->origin.x + paddleIn->paddleWidth / 2 && ballIn->origin.y + ballIn->ballSize > paddleIn->origin.y - paddleIn->paddleLength / 2 && ballIn->origin.y - ballIn->ballSize < paddleIn->origin.y + paddleIn->paddleLength / 2 + safetyNet) {
@@ -68,6 +68,7 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
 		if (ballIn->velocity.y > 0) {
 			ballIn->velocity.y = abs(ballIn->velocity.y) * -1;
 		}
+		paddleHitIn->play();
 	}
 
 	if (collided) {
@@ -101,8 +102,10 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
 		ballIn->isDeadBall = true;
 		comboHit = 0;
 		gameLives--;
+		deadBallSoundIn->play();
 		if (gameLives < 1) {
 			gameOver = true;
+			gameOverSoundIn->play();
 		}
 		else {
 			ballIn->isFired = false;
@@ -115,6 +118,7 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
 			ballIn->position.x = windowSizeX - ballIn->ballSize*2;
 			ballIn->velocity.x = abs(ballIn->velocity.x) * -1;
 			ballIn->collisionColorLife = 10;
+			ballEdgeSoundIn->play();
 		}
 	}
 	else if (ballIn->origin.x < 0 + ballIn->ballSize) {
@@ -122,6 +126,7 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
 			ballIn->position.x = 0;
 			ballIn->velocity.x = abs(ballIn->velocity.x);
 			ballIn->collisionColorLife = 10;
+			ballEdgeSoundIn->play();
 		}
 	}
 
@@ -130,11 +135,12 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn) {
 			ballIn->position.y = 0;
 			ballIn->velocity.y = abs(ballIn->velocity.y);
 			ballIn->collisionColorLife = 10;
+			ballEdgeSoundIn->play();
 		}
 	}
 }
 
-void setupStageOne(std::vector<Brick*>* bricksIn, std::vector<sf::Texture*>* brickTexturesIn) {
+void setupStageOne(std::vector<Brick*>* bricksIn, std::vector<sf::Texture*>* brickTexturesIn, std::vector<sf::Sound*>* breadSoundsIn) {
 	float xGapDistance = 7.0f;
 	float yGapDistance = 20.0f;
 	int colBlocksNeeded = floor(windowSizeX / (globalBrickWidth + xGapDistance));
@@ -199,7 +205,7 @@ void setupStageOne(std::vector<Brick*>* bricksIn, std::vector<sf::Texture*>* bri
 			srand(time(0)*i+j);
 			int randomSeed = rand() % 15 + 1;
 
-			newBrick = new Brick(globalBrickLength, globalBrickWidth, sf::Vector2f(xPosition, yPosition), brickTexturesIn, brickLife, randomSeed);
+			newBrick = new Brick(globalBrickLength, globalBrickWidth, sf::Vector2f(xPosition, yPosition), brickTexturesIn, breadSoundsIn, brickLife, randomSeed);
 			xPosition = xPosition + globalBrickWidth + xGapDistance;
 			bricksIn->push_back(newBrick);
 			brickLife = 1;
@@ -212,6 +218,15 @@ void setupStageOne(std::vector<Brick*>* bricksIn, std::vector<sf::Texture*>* bri
 		}
 		yPosition = yPosition + globalBrickLength + yGapDistance;
 	}
+}
+
+void resetStage(Ball* ballIn) {
+	comboHit = 0;
+	globalBallVelocityY -= 0.07f;
+	ballIn->isFired = false;
+	ballIn->position = sf::Vector2f(0.0f, 0.0f);
+	ballIn->velocity = sf::Vector2f(globalBallVelocityX, globalBallVelocityY);
+	ballIn->updateOrigin();
 }
 
 int main()
@@ -228,6 +243,135 @@ int main()
 	);
 	std::vector<Ball*> balls;
 	balls.push_back(&startingBall);
+
+	//Sound stuff
+	sf::SoundBuffer paddleHitBuffer;
+	sf::SoundBuffer ballBounceEdgeBuffer;
+	sf::SoundBuffer deadBallBuffer;
+	sf::SoundBuffer gameOverBuffer;
+	sf::SoundBuffer victorySoundBuffer;
+	if (!ballBounceEdgeBuffer.loadFromFile("Resources/Sounds/BallEdge.wav"))
+		return -1;
+	if (!deadBallBuffer.loadFromFile("Resources/Sounds/DeadBall.wav"))
+		return -1;
+	if (!gameOverBuffer.loadFromFile("Resources/Sounds/Game Over.wav"))
+		return -1;
+	if (!paddleHitBuffer.loadFromFile("Resources/Sounds/Paddle.wav"))
+		return -1;
+	if (!victorySoundBuffer.loadFromFile("Resources/Sounds/Victory.wav"))
+		return -1;
+	sf::Sound deadBall;
+	sf::Sound ballBounceEdge;
+	sf::Sound gameOverSound;
+	sf::Sound paddleHit;
+	sf::Sound victorySound;
+	deadBall.setBuffer(deadBallBuffer);
+	ballBounceEdge.setBuffer(ballBounceEdgeBuffer);
+	gameOverSound.setBuffer(gameOverBuffer);
+	paddleHit.setBuffer(paddleHitBuffer);
+	victorySound.setBuffer(victorySoundBuffer);
+
+	//Bread sounds stuff
+	sf::SoundBuffer breadPaperBagBuffer;
+	sf::SoundBuffer bread1Buffer;
+	sf::SoundBuffer bread2Buffer;
+	sf::SoundBuffer bread3Buffer;
+	sf::SoundBuffer bread4Buffer;
+	sf::SoundBuffer bread5Buffer;
+	sf::SoundBuffer bread6Buffer;
+	sf::SoundBuffer bread7Buffer;
+	sf::SoundBuffer bread8Buffer;
+	sf::SoundBuffer bread9Buffer;
+	sf::SoundBuffer bread10Buffer;
+	sf::SoundBuffer bread11Buffer;
+	sf::SoundBuffer bread12Buffer;
+	sf::SoundBuffer bread13Buffer;
+	sf::SoundBuffer bread14Buffer;
+	sf::SoundBuffer bread15Buffer;
+	if (!breadPaperBagBuffer.loadFromFile("Resources/Sounds/PaperBag.wav"))
+		return -1;
+	if (!bread1Buffer.loadFromFile("Resources/Sounds/Bread1.wav"))
+		return -1;
+	if (!bread2Buffer.loadFromFile("Resources/Sounds/Bread2.wav"))
+		return -1;
+	if (!bread3Buffer.loadFromFile("Resources/Sounds/Bread3.wav"))
+		return -1;
+	if (!bread4Buffer.loadFromFile("Resources/Sounds/Bread4.wav"))
+		return -1;
+	if (!bread5Buffer.loadFromFile("Resources/Sounds/Bread5.wav"))
+		return -1;
+	if (!bread6Buffer.loadFromFile("Resources/Sounds/Bread6.wav"))
+		return -1;
+	if (!bread7Buffer.loadFromFile("Resources/Sounds/Bread7.wav"))
+		return -1;
+	if (!bread8Buffer.loadFromFile("Resources/Sounds/Bread8.wav"))
+		return -1;
+	if (!bread9Buffer.loadFromFile("Resources/Sounds/Bread9.wav"))
+		return -1;
+	std::cout << "reached";
+	if (!bread10Buffer.loadFromFile("Resources/Sounds/Bread10.wav"))
+		return -1;
+	if (!bread11Buffer.loadFromFile("Resources/Sounds/Bread11.wav"))
+		return -1;
+	if (!bread12Buffer.loadFromFile("Resources/Sounds/Bread12.wav"))
+		return -1;
+	if (!bread13Buffer.loadFromFile("Resources/Sounds/Bread13.wav"))
+		return -1;
+	if (!bread14Buffer.loadFromFile("Resources/Sounds/Bread14.wav"))
+		return -1;
+	if (!bread15Buffer.loadFromFile("Resources/Sounds/Bread15.wav"))
+		return -1;
+	sf::Sound breadPaperBag;
+	sf::Sound bread1;
+	sf::Sound bread2;
+	sf::Sound bread3;
+	sf::Sound bread4;
+	sf::Sound bread5;
+	sf::Sound bread6;
+	sf::Sound bread7;
+	sf::Sound bread8;
+	sf::Sound bread9;
+	sf::Sound bread10;
+	sf::Sound bread11;
+	sf::Sound bread12;
+	sf::Sound bread13;
+	sf::Sound bread14;
+	sf::Sound bread15;
+	breadPaperBag.setBuffer(breadPaperBagBuffer);
+	bread1.setBuffer(bread1Buffer);
+	bread2.setBuffer(bread2Buffer);
+	bread3.setBuffer(bread3Buffer);
+	bread4.setBuffer(bread4Buffer);
+	bread5.setBuffer(bread5Buffer);
+	bread6.setBuffer(bread6Buffer);
+	bread7.setBuffer(bread7Buffer);
+	bread8.setBuffer(bread8Buffer);
+	bread9.setBuffer(bread9Buffer);
+	bread10.setBuffer(bread10Buffer);
+	bread11.setBuffer(bread11Buffer);
+	bread12.setBuffer(bread12Buffer);
+	bread13.setBuffer(bread13Buffer);
+	bread14.setBuffer(bread14Buffer);
+	bread15.setBuffer(bread15Buffer);
+	
+	std::vector<sf::Sound*> breadSounds;
+	breadSounds.push_back(&breadPaperBag);
+	breadSounds.push_back(&bread1);
+	breadSounds.push_back(&bread2);
+	breadSounds.push_back(&bread3);
+	breadSounds.push_back(&bread4);
+	breadSounds.push_back(&bread5);
+	breadSounds.push_back(&bread6);
+	breadSounds.push_back(&bread7);
+	breadSounds.push_back(&bread8);
+	breadSounds.push_back(&bread9);
+	breadSounds.push_back(&bread10);
+	breadSounds.push_back(&bread11);
+	breadSounds.push_back(&bread12);
+	breadSounds.push_back(&bread13);
+	breadSounds.push_back(&bread14);
+	breadSounds.push_back(&bread15);
+
 
 	//Paddle stuff
 	Paddle playerPaddle(globalPaddleLength, globalPaddleWidth, globalPaddleSpeed, sf::Vector2f(windowSizeX/2 - globalPaddleWidth / 2, windowSizeY - globalPaddleLength));
@@ -380,7 +524,7 @@ int main()
 
 	//Brick stuff
 	std::vector<Brick*> bricks;
-	setupStageOne(&bricks, &brickTextures);
+	setupStageOne(&bricks, &brickTextures, &breadSounds);
 
 	//font stuff
 	sf::Font font;
@@ -422,11 +566,11 @@ int main()
 		}
 		window.clear(sf::Color(15,15,25,255));
 
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) && !gameOver) {
 			balls.at(0)->isFired = true;
 			balls.at(0)->isDeadBall = false;
 		}
-		checkCollisionPaddle(balls.at(0), &playerPaddle);
+		checkCollisionPaddle(balls.at(0), &playerPaddle, &ballBounceEdge, &deadBall, &paddleHit, &gameOverSound);
 		if (!balls.at(0)->isFired) {
 			balls.at(0)->position.x = playerPaddle.origin.x - balls.at(0)->ballSize;
 			balls.at(0)->position.y = playerPaddle.origin.y - balls.at(0)->ballSize*2 - playerPaddle.paddleLength/2;
@@ -483,8 +627,39 @@ int main()
 		window.draw(scoreText);
 		window.draw(scoreStringText);
 		window.draw(livesText);
+
+		if (gameLives > 0 && bricks.size() == 0) {
+			//stage cleared.
+			resetStage(balls.at(0));
+			setupStageOne(&bricks, &brickTextures, &breadSounds);
+			victorySound.play();
+		}
+
+		if (gameOver) {
+			sf::Text gameOverText;
+			gameOverText.setFont(font);
+			gameOverText.setString("Game Over. Press Enter to restart.");
+			gameOverText.setCharacterSize(40);
+			gameOverText.setPosition(windowSizeX/2 - 300, windowSizeY/2);
+			gameOverText.setFillColor(sf::Color::White);
+			window.draw(gameOverText);
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter)) {
+				gameScore = 0;
+				gameLives = 3;
+				comboHit = 0;
+				bricks.clear();
+				setupStageOne(&bricks, &brickTextures, &breadSounds);
+				globalBallVelocityY = 0.5f;
+				balls.at(0)->isFired = false;
+				balls.at(0)->position = sf::Vector2f(0.0f, 0.0f);
+				balls.at(0)->velocity = sf::Vector2f(globalBallVelocityX, globalBallVelocityY);
+				balls.at(0)->updateOrigin();
+				gameOver = false;
+			}
+		}
+
 		window.display();
-		//clock.restart();
+
 	}
 
 	return 0;
