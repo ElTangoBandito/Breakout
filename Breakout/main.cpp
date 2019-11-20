@@ -141,7 +141,8 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn, sf::Sound* ballEdgeSou
 }
 
 void setupStageOne(std::vector<Brick*>* bricksIn, std::vector<sf::Texture*>* brickTexturesIn, std::vector<sf::Sound*>* breadSoundsIn) {
-	float xGapDistance = 7.0f;
+	srand(time(0));
+	float xGapDistance = 8.0f;
 	float yGapDistance = 20.0f;
 	int colBlocksNeeded = floor(windowSizeX / (globalBrickWidth + xGapDistance));
 	int rowsNeeded = 9;
@@ -202,7 +203,6 @@ void setupStageOne(std::vector<Brick*>* bricksIn, std::vector<sf::Texture*>* bri
 				break;
 			}
 			Brick* newBrick;
-			srand(time(0)*i+j);
 			int randomSeed = rand() % 15 + 1;
 
 			newBrick = new Brick(globalBrickLength, globalBrickWidth, sf::Vector2f(xPosition, yPosition), brickTexturesIn, breadSoundsIn, brickLife, randomSeed);
