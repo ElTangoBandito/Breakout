@@ -18,6 +18,9 @@ public:
 	int hitLife;
 	sf::Texture paddleTexture;
 	sf::Texture paddleHitTexture;
+	float currentMouseX;
+	float prevMouseX;
+	sf::Mouse mouse;
 
 public:
 	Paddle(

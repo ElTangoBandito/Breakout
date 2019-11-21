@@ -13,6 +13,7 @@
 #include "Ball.h"
 #include "Paddle.h"
 #include "Brick.h"
+#include "AnnoyingBread.h"
 
 //wrapped bread for extra hit life
 
@@ -29,7 +30,7 @@ int comboHit = 0;
 //ball variables
 float globalBallRadius = 6.0f;
 float globalBallVelocityX = 0.04f;
-float globalBallVelocityY = -0.5f;
+float globalBallVelocityY = -0.4f;
 
 //paddle variables
 float globalPaddleLength = 20.0f;
@@ -288,6 +289,28 @@ int main()
 	sf::SoundBuffer bread13Buffer;
 	sf::SoundBuffer bread14Buffer;
 	sf::SoundBuffer bread15Buffer;
+
+	sf::SoundBuffer annoyingBread1Buffer;
+	sf::SoundBuffer annoyingBread2Buffer;
+	sf::SoundBuffer annoyingBread3Buffer;
+	sf::SoundBuffer annoyingBread4Buffer;
+	if (!annoyingBread1Buffer.loadFromFile("Resources/Sounds/AnnoyingBread1.wav"))
+		return -1;
+	if (!annoyingBread2Buffer.loadFromFile("Resources/Sounds/AnnoyingBread2.wav"))
+		return -1;
+	if (!annoyingBread3Buffer.loadFromFile("Resources/Sounds/AnnoyingBread3.wav"))
+		return -1;
+	if (!annoyingBread4Buffer.loadFromFile("Resources/Sounds/AnnoyingBread4.wav"))
+		return -1;
+	sf::Sound annoyingBread1Sound;
+	sf::Sound annoyingBread2Sound;
+	sf::Sound annoyingBread3Sound;
+	sf::Sound annoyingBread4Sound;
+	annoyingBread1Sound.setBuffer(annoyingBread1Buffer);
+	annoyingBread2Sound.setBuffer(annoyingBread2Buffer);
+	annoyingBread3Sound.setBuffer(annoyingBread3Buffer);
+	annoyingBread4Sound.setBuffer(annoyingBread4Buffer);
+
 	if (!breadPaperBagBuffer.loadFromFile("Resources/Sounds/PaperBag.wav"))
 		return -1;
 	if (!bread1Buffer.loadFromFile("Resources/Sounds/Bread1.wav"))
@@ -308,7 +331,6 @@ int main()
 		return -1;
 	if (!bread9Buffer.loadFromFile("Resources/Sounds/Bread9.wav"))
 		return -1;
-	std::cout << "reached";
 	if (!bread10Buffer.loadFromFile("Resources/Sounds/Bread10.wav"))
 		return -1;
 	if (!bread11Buffer.loadFromFile("Resources/Sounds/Bread11.wav"))
@@ -372,7 +394,11 @@ int main()
 	breadSounds.push_back(&bread14);
 	breadSounds.push_back(&bread15);
 
-
+	std::vector<sf::Sound*> annoyingSounds;
+	annoyingSounds.push_back(&annoyingBread1Sound);
+	annoyingSounds.push_back(&annoyingBread2Sound);
+	annoyingSounds.push_back(&annoyingBread3Sound);
+	annoyingSounds.push_back(&annoyingBread4Sound);
 	//Paddle stuff
 	Paddle playerPaddle(globalPaddleLength, globalPaddleWidth, globalPaddleSpeed, sf::Vector2f(windowSizeX/2 - globalPaddleWidth / 2, windowSizeY - globalPaddleLength));
 
@@ -526,6 +552,9 @@ int main()
 	std::vector<Brick*> bricks;
 	setupStageOne(&bricks, &brickTextures, &breadSounds);
 
+	//annoying bread stuff
+	AnnoyingBread annoyingBread(windowSizeX + 21, windowSizeY/2 + 70, &annoyingSounds);
+
 	//font stuff
 	sf::Font font;
 	if (!font.loadFromFile("Resources/Fonts/Mister Pumpkins Aged.ttf"))
@@ -575,6 +604,8 @@ int main()
 			balls.at(0)->position.x = playerPaddle.origin.x - balls.at(0)->ballSize;
 			balls.at(0)->position.y = playerPaddle.origin.y - balls.at(0)->ballSize*2 - playerPaddle.paddleLength/2;
 		}
+		annoyingBread.update(deltaTime, balls.at(0), windowSizeX);
+		annoyingBread.draw(&window);
 		balls.at(0)->update(deltaTime);
 		balls.at(0)->draw(&window);
 		playerPaddle.update(deltaTime, windowSizeX);
@@ -604,6 +635,10 @@ int main()
 			}
 			if (bricks.at(i)->isDestroyed) {
 				indexToDelete.push_back(i);
+				int randomAnnoyingSpawn = rand() % 3;
+				if (randomAnnoyingSpawn == 1) {
+					annoyingBread.goalReached = false;
+				}
 				//bricks.erase(bricks.begin() + i); This causes all bricks to flicker. Maybe because vector.erase forces the loop to restart?
 			}
 		}
@@ -632,6 +667,8 @@ int main()
 			//stage cleared.
 			resetStage(balls.at(0));
 			setupStageOne(&bricks, &brickTextures, &breadSounds);
+			annoyingBread.position.x = windowSizeX + 21;
+			annoyingBread.goalReached = true;
 			victorySound.play();
 		}
 
@@ -649,11 +686,13 @@ int main()
 				comboHit = 0;
 				bricks.clear();
 				setupStageOne(&bricks, &brickTextures, &breadSounds);
-				globalBallVelocityY = 0.5f;
+				globalBallVelocityY = -0.5f;
 				balls.at(0)->isFired = false;
 				balls.at(0)->position = sf::Vector2f(0.0f, 0.0f);
 				balls.at(0)->velocity = sf::Vector2f(globalBallVelocityX, globalBallVelocityY);
 				balls.at(0)->updateOrigin();
+				annoyingBread.position.x = windowSizeX + 21;
+				annoyingBread.goalReached = true;
 				gameOver = false;
 			}
 		}

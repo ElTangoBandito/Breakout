@@ -20,6 +20,8 @@ Paddle::Paddle(
 	this->paddleSpeed = speedIn;
 	this->position = positionIn;
 	this->hitLife = 0;
+	this->currentMouseX = this->mouse.getPosition().x;
+	this->prevMouseX = currentMouseX;
 	paddleTexture.loadFromFile("Resources/Textures/Paddle.jpg");
 	paddleHitTexture.loadFromFile("Resources/Textures/PaddleHit.jpg");
 	paddleTexture.setSmooth(true);
@@ -37,16 +39,18 @@ void Paddle::updateOrigin() {
 }
 
 void Paddle::update(float deltaTimeIn, int windowSizeXIn) {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+	currentMouseX = this->mouse.getPosition().x;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) || currentMouseX < prevMouseX) {
 		if (this->origin.x > 15){// this->paddleWidth / 2) {
 			this->position.x -= paddleSpeed * deltaTimeIn;
 		}
 	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) || currentMouseX > prevMouseX) {
 		if (this->origin.x < windowSizeXIn - 15){// - this->paddleWidth / 2) {
 			this->position.x += paddleSpeed * deltaTimeIn;
 		}
 	}
+	prevMouseX = currentMouseX;
 	updateOrigin();
 }
 
