@@ -27,6 +27,7 @@ Paddle::Paddle(
 	paddleTexture.setSmooth(true);
 	paddleHitTexture.setSmooth(true);
 	updateOrigin();
+	this->stickyPower = false;
 }
 
 Paddle::~Paddle() {
@@ -41,12 +42,12 @@ void Paddle::updateOrigin() {
 void Paddle::update(float deltaTimeIn, int windowSizeXIn) {
 	currentMouseX = this->mouse.getPosition().x;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) || currentMouseX < prevMouseX) {
-		if (this->origin.x > 15){// this->paddleWidth / 2) {
+		if (this->origin.x > this->paddleWidth / 2){
 			this->position.x -= paddleSpeed * deltaTimeIn;
 		}
 	}
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) || currentMouseX > prevMouseX) {
-		if (this->origin.x < windowSizeXIn - 15){// - this->paddleWidth / 2) {
+		if (this->origin.x < windowSizeXIn - this->paddleWidth / 2){
 			this->position.x += paddleSpeed * deltaTimeIn;
 		}
 	}
@@ -57,13 +58,15 @@ void Paddle::update(float deltaTimeIn, int windowSizeXIn) {
 void Paddle::draw(sf::RenderWindow* windowIn) {
 	sf::RectangleShape rect(sf::Vector2f(this->paddleWidth, this->paddleLength));
 	rect.setPosition(this->position.x, this->position.y);
-	//rect.setFillColor(sf::Color::White);
 	if (this->hitLife > 0) {
 		rect.setTexture(&paddleHitTexture);
 		this->hitLife--;
 	}
 	else {
 		rect.setTexture(&paddleTexture);
+	}
+	if (this->stickyPower) {
+		rect.setFillColor(sf::Color::Green);
 	}
 	windowIn->draw(rect);
 }

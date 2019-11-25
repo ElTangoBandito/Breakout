@@ -14,6 +14,7 @@
 #include "Paddle.h"
 #include "Brick.h"
 #include "AnnoyingBread.h"
+#include "Powerup.h"
 
 //wrapped bread for extra hit life
 
@@ -53,6 +54,13 @@ float deltaTimePrev = 0.0f;
 float deltaTimeCurrent = 0.0f;
 float deltaTime = 1.0f;
 
+//powerup variables
+float widthUpLife = 0;
+float stickyPowerLife = 0;
+float stickyPositionXOffset = 0;
+float superSpeedPowerLife = 0;
+float superBallSizeLife = 0;
+
 void updateDT(sf::Clock* clockIn) {
 	deltaTimePrev = deltaTimeCurrent;
 	deltaTimeCurrent = clockIn->getElapsedTime().asMilliseconds();
@@ -60,7 +68,7 @@ void updateDT(sf::Clock* clockIn) {
 
 }
 
-void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn, sf::Sound* ballEdgeSoundIn, sf::Sound* deadBallSoundIn, sf::Sound* paddleHitIn, sf::Sound* gameOverSoundIn) {
+void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn, sf::Sound* ballEdgeSoundIn, sf::Sound* deadBallSoundIn, sf::Sound* paddleHitIn, sf::Sound* gameOverSoundIn, sf::Sound* stickyPaddleSoundIn) {
 	float safetyNet = abs(ballIn->velocity.y) * 50; //prevents ball from going through paddle when its too fast. Ball will still go through eventually.
 	bool collided = false;
 	if (ballIn->origin.x + ballIn->ballSize > paddleIn->origin.x - paddleIn->paddleWidth / 2 && ballIn->origin.x - ballIn->ballSize < paddleIn->origin.x + paddleIn->paddleWidth / 2 && ballIn->origin.y + ballIn->ballSize > paddleIn->origin.y - paddleIn->paddleLength / 2 && ballIn->origin.y - ballIn->ballSize < paddleIn->origin.y + paddleIn->paddleLength / 2 + safetyNet) {
@@ -69,10 +77,17 @@ void checkCollisionPaddle(Ball* ballIn, Paddle* paddleIn, sf::Sound* ballEdgeSou
 		if (ballIn->velocity.y > 0) {
 			ballIn->velocity.y = abs(ballIn->velocity.y) * -1;
 		}
-		paddleHitIn->play();
 	}
 
 	if (collided) {
+		if (stickyPowerLife > 0) {
+			ballIn->isFired = false;
+			stickyPositionXOffset = ballIn->origin.x - paddleIn->origin.x;
+			stickyPaddleSoundIn->play();
+		}
+		else {
+			paddleHitIn->play();
+		}
 		float maxAngle = 260.0f;
 		float xForce = ballIn->velocity.x;
 		float yForce = ballIn->velocity.y;
@@ -245,12 +260,48 @@ int main()
 	std::vector<Ball*> balls;
 	balls.push_back(&startingBall);
 
+	//powerup Sound stuff
+	sf::SoundBuffer powerup1Buffer;
+	sf::SoundBuffer powerup2Buffer;
+	sf::SoundBuffer powerup3Buffer;
+	sf::SoundBuffer powerup4Buffer;
+	sf::SoundBuffer powerup5Buffer;
+	if (!powerup1Buffer.loadFromFile("Resources/Sounds/Powerup1.wav"))
+		return -1;
+	if (!powerup2Buffer.loadFromFile("Resources/Sounds/Powerup2.wav"))
+		return -1;
+	if (!powerup3Buffer.loadFromFile("Resources/Sounds/Powerup3.wav"))
+		return -1;
+	if (!powerup4Buffer.loadFromFile("Resources/Sounds/Powerup4.wav"))
+		return -1;
+	if (!powerup5Buffer.loadFromFile("Resources/Sounds/Powerup5.wav"))
+		return -1;
+	sf::Sound powerup1Sound;
+	sf::Sound powerup2Sound;
+	sf::Sound powerup3Sound;
+	sf::Sound powerup4Sound;
+	sf::Sound powerup5Sound;
+	powerup1Sound.setBuffer(powerup1Buffer);
+	powerup2Sound.setBuffer(powerup2Buffer);
+	powerup3Sound.setBuffer(powerup3Buffer);
+	powerup4Sound.setBuffer(powerup4Buffer);
+	powerup5Sound.setBuffer(powerup5Buffer);
+
+	std::vector<sf::Sound*> powerupSounds;
+	powerupSounds.push_back(&powerup1Sound);
+	powerupSounds.push_back(&powerup2Sound);
+	powerupSounds.push_back(&powerup3Sound);
+	powerupSounds.push_back(&powerup4Sound);
+	powerupSounds.push_back(&powerup5Sound);
+
 	//Sound stuff
 	sf::SoundBuffer paddleHitBuffer;
 	sf::SoundBuffer ballBounceEdgeBuffer;
 	sf::SoundBuffer deadBallBuffer;
 	sf::SoundBuffer gameOverBuffer;
 	sf::SoundBuffer victorySoundBuffer;
+	sf::SoundBuffer resetPaddleSizeBuffer;
+	sf::SoundBuffer stickyPaddleBuffer;
 	if (!ballBounceEdgeBuffer.loadFromFile("Resources/Sounds/BallEdge.wav"))
 		return -1;
 	if (!deadBallBuffer.loadFromFile("Resources/Sounds/DeadBall.wav"))
@@ -261,16 +312,24 @@ int main()
 		return -1;
 	if (!victorySoundBuffer.loadFromFile("Resources/Sounds/Victory.wav"))
 		return -1;
+	if (!resetPaddleSizeBuffer.loadFromFile("Resources/Sounds/Reset.wav"))
+		return -1;
+	if (!stickyPaddleBuffer.loadFromFile("Resources/Sounds/Sticky.wav"))
+		return -1;
 	sf::Sound deadBall;
 	sf::Sound ballBounceEdge;
 	sf::Sound gameOverSound;
 	sf::Sound paddleHit;
 	sf::Sound victorySound;
+	sf::Sound resetPaddleSound;
+	sf::Sound stickyPaddleSound;
 	deadBall.setBuffer(deadBallBuffer);
 	ballBounceEdge.setBuffer(ballBounceEdgeBuffer);
 	gameOverSound.setBuffer(gameOverBuffer);
 	paddleHit.setBuffer(paddleHitBuffer);
 	victorySound.setBuffer(victorySoundBuffer);
+	resetPaddleSound.setBuffer(resetPaddleSizeBuffer);
+	stickyPaddleSound.setBuffer(stickyPaddleBuffer);
 
 	//Bread sounds stuff
 	sf::SoundBuffer breadPaperBagBuffer;
@@ -401,6 +460,24 @@ int main()
 	annoyingSounds.push_back(&annoyingBread4Sound);
 	//Paddle stuff
 	Paddle playerPaddle(globalPaddleLength, globalPaddleWidth, globalPaddleSpeed, sf::Vector2f(windowSizeX/2 - globalPaddleWidth / 2, windowSizeY - globalPaddleLength));
+
+	//powerup Textures
+	std::vector<sf::Texture*> powerupTextures;
+	sf::Texture powerup1Texture;
+	sf::Texture powerup2Texture;
+	sf::Texture powerup3Texture;
+	sf::Texture powerup4Texture;
+	sf::Texture powerup5Texture;
+	powerup1Texture.loadFromFile("Resources/Textures/Powerup1.png");
+	powerup2Texture.loadFromFile("Resources/Textures/Powerup2.png");
+	powerup3Texture.loadFromFile("Resources/Textures/Powerup3.png");
+	powerup4Texture.loadFromFile("Resources/Textures/Powerup4.png");
+	powerup5Texture.loadFromFile("Resources/Textures/Powerup5.png");
+	powerupTextures.push_back(&powerup1Texture);
+	powerupTextures.push_back(&powerup2Texture);
+	powerupTextures.push_back(&powerup3Texture);
+	powerupTextures.push_back(&powerup4Texture);
+	powerupTextures.push_back(&powerup5Texture);
 
 	//Brick Textures
 	std::vector<sf::Texture*> brickTextures;
@@ -555,6 +632,9 @@ int main()
 	//annoying bread stuff
 	AnnoyingBread annoyingBread(windowSizeX + 21, windowSizeY/2 + 70, &annoyingSounds);
 
+	//powerup Stuff
+	std::vector<Powerup*> powerups;
+
 	//font stuff
 	sf::Font font;
 	if (!font.loadFromFile("Resources/Fonts/Mister Pumpkins Aged.ttf"))
@@ -595,13 +675,46 @@ int main()
 		}
 		window.clear(sf::Color(15,15,25,255));
 
+		//powerup calculations
+		if (widthUpLife > 0) {
+			if (widthUpLife == 1) {
+				playerPaddle.paddleWidth = globalPaddleWidth;
+				resetPaddleSound.play();
+			}
+			widthUpLife--;
+		}
+
+		if (stickyPowerLife > 0) {
+			stickyPowerLife--;
+			if (stickyPowerLife == 0) {
+				playerPaddle.stickyPower = false;
+			}
+		}
+
+		if (superSpeedPowerLife > 0) {
+			superSpeedPowerLife--;
+			if (superSpeedPowerLife == 0) {
+				playerPaddle.paddleSpeed = globalPaddleSpeed;
+			}
+		}
+
+		if (superBallSizeLife > 0) {
+			superBallSizeLife--;
+			if (superBallSizeLife == 0) {
+				balls.at(0)->ballSize = globalBallRadius;
+			}
+		}
+
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) && !gameOver) {
 			balls.at(0)->isFired = true;
 			balls.at(0)->isDeadBall = false;
 		}
-		checkCollisionPaddle(balls.at(0), &playerPaddle, &ballBounceEdge, &deadBall, &paddleHit, &gameOverSound);
+		checkCollisionPaddle(balls.at(0), &playerPaddle, &ballBounceEdge, &deadBall, &paddleHit, &gameOverSound, &stickyPaddleSound);
 		if (!balls.at(0)->isFired) {
 			balls.at(0)->position.x = playerPaddle.origin.x - balls.at(0)->ballSize;
+			if (stickyPowerLife > 0) {
+				balls.at(0)->position.x = playerPaddle.origin.x + stickyPositionXOffset - balls.at(0)->ballSize;
+			}
 			balls.at(0)->position.y = playerPaddle.origin.y - balls.at(0)->ballSize*2 - playerPaddle.paddleLength/2;
 		}
 		annoyingBread.update(deltaTime, balls.at(0), windowSizeX);
@@ -612,6 +725,7 @@ int main()
 		playerPaddle.draw(&window);
 
 		std::vector<int> indexToDelete;
+		std::vector<int> indexToDeletePowerups;
 		for (int i = 0; i < bricks.size(); i++) {
 			bricks.at(i)->update(balls.at(0));
 			bricks.at(i)->draw(&window);
@@ -642,11 +756,49 @@ int main()
 				//bricks.erase(bricks.begin() + i); This causes all bricks to flicker. Maybe because vector.erase forces the loop to restart?
 			}
 		}
+		for (int i = 0; i < powerups.size(); i++) {
+			powerups.at(i)->update(deltaTime, &playerPaddle);
+			powerups.at(i)->draw(&window);
+			if (powerups.at(i)->isDead) {
+				indexToDeletePowerups.push_back(i);
+			}
+		}
 
 		for (int i = indexToDelete.size() - 1; i > -1; i--) {
+			if (rand() % 5 == 0) {
+				Powerup* powerup;
+				powerup = new Powerup(bricks.at(indexToDelete.at(i))->origin, &powerupSounds, &powerupTextures, windowSizeY);
+				powerups.push_back(powerup);
+			}
 			bricks.erase(bricks.begin() + indexToDelete.at(i));
 		}
 
+		for (int i = indexToDeletePowerups.size() - 1; i > -1; i--) {
+			if (powerups.at(indexToDeletePowerups.at(i))->isTaken) {
+				switch (powerups.at(i)->type) {
+				case 0:
+					widthUpLife = 4000;
+					playerPaddle.paddleWidth += 30;
+					break;
+				case 1:
+					stickyPowerLife = 2000;
+					playerPaddle.stickyPower = true;
+					break;
+				case 2:
+					superSpeedPowerLife = 4000;
+					playerPaddle.paddleSpeed = 0.8;
+					break;
+				case 3:
+					superBallSizeLife = 2000;
+					balls.at(0)->ballSize = 10;
+					break;
+				case 4:
+					gameLives += 1;
+					break;
+				}
+			}
+			powerups.erase(powerups.begin() + indexToDeletePowerups.at(i));
+		}
 
 
 		//score text stuff

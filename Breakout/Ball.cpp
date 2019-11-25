@@ -24,7 +24,6 @@ Ball::Ball(
 	this->wrapColor = sf::Color::White;
 	this->isFired = false;
 	this->collisionColorLife = 0;
-	ballTexture.loadFromFile("Resources/Textures/Ball.png");
 	updateOrigin();
 }
 Ball::~Ball() {

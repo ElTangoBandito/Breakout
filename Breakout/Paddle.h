@@ -21,6 +21,7 @@ public:
 	float currentMouseX;
 	float prevMouseX;
 	sf::Mouse mouse;
+	bool stickyPower;
 
 public:
 	Paddle(

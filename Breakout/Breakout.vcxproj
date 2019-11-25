@@ -162,6 +162,7 @@
     <ClInclude Include="Ball.h" />
     <ClInclude Include="Brick.h" />
     <ClInclude Include="Paddle.h" />
+    <ClInclude Include="Powerup.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AnnoyingBread.cpp" />
@@ -169,6 +170,7 @@
     <ClCompile Include="Brick.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Paddle.cpp" />
+    <ClCompile Include="Powerup.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
